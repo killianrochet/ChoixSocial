@@ -2,6 +2,8 @@ import csv
 import numpy as np
 import pandas as pd
 import time
+import matplotlib.pyplot as plt
+
 
 ########## GENERIC ##########
 
@@ -60,13 +62,17 @@ def table_condorcet(data):
             if liste[entry][entries] > len(data)/2:
                 gagne += 1
         liste_condorcet.append(gagne)
+
+    print(liste_condorcet)
+    print("Selon Condorcet, l'élu est le candidat " + str(liste_condorcet.index(max(liste_condorcet)) + 1))
+
     return liste_condorcet
 
 ########## BORDA ##########
 
 def borda2():
     # Lecture du fichier CSV
-    with open('edit_data/profil1.csv', 'r') as csvfile:
+    with open('data/profil1.csv', 'r') as csvfile:
         reader = csv.reader(csvfile)
         data = [list(map(int, row)) for row in reader]
 
@@ -115,6 +121,7 @@ def rounds(df, nb_round=1):
         if (nb_first >= (votes /2 + 1)):
             print("Vainqueur au tour 1 par majorité absolue : Candidat " + str(id_first) + " avec " + str(nb_first) + " voix.")
 
+        print(ranks_r1)
         nb_sec = ranks_r1.iloc[1]
         id_sec = ranks_r1.index[1]
         print("Vainqueurs au tour 1 : Candidat " + str(id_first) + " avec " + str(nb_first) + " voix et Candidat " + str(id_sec) + " avec " + str(nb_sec) + " voix.")
@@ -127,7 +134,9 @@ def rounds(df, nb_round=1):
         id_winner = counts.index[0]
 
         # Print final results
+        print(counts)
         print("Vainqueur au tour 2 : Candidat " + str(id_winner) + " avec " + str(nb_winner) + " voix.")
+        return ranks_r2
 
 
 ########## COOMBS ##########
@@ -208,27 +217,41 @@ if __name__ == "__main__":
 
     # Init df
     profile = input("Choisissez un profil de données:\n1)profil1\n2)profil2\n3)profil3\n")
-    method = input("Choisissez une méthode de choix social:\n1)Condorset\n2)Borda\n3)Rounds\n4)Coombs\n5)Alternatif\n")
+    method = input("Choisissez une méthode de choix social:\n1)Condorset\n2)Borda\n3)Rounds\n4)Coombs\n5)Alternatif\n6)Save figs\n")
+
     
     df = pd.read_csv(filepath_or_buffer='data/profil' + profile + '.csv', sep=',', header=None)
 
     # Launch methods
-    if (method == "1" or "Condorset"):
+    if (method == "1"):
         print('##### CONDORSET #####')
         # launch condorset
-    if (method == "2" or "Borda"):
+        # with open('data/profil1.csv', newline='') as profil1:
+        #     r = csv.reader(profil1)
+        #     data1 = list(r)
+    if (method == "2"):
         print('##### BORDA #####')
         # launch borda
-    if (method == "3" or "Rounds"):
+    if (method == "3"):
         nbRounds = input('En combien de tours voulez vous effectuer cette méthode ? (1 ou 2)')
         print('##### ROUNDS #####')
-        rounds(df, nbRounds)
-    if (method == "4" or "Coombs"):
+        rounds(df, int(nbRounds))
+    if (method == "4"):
         print('##### COOMBS #####')
         coombs(df)
-    if (method == "5" or "Alternatif"):
+    if (method == "5"):
         print('##### ALTERNATIF #####')
         alternatif(df)
+    if (method == "6"):
+        for i in range(5):
+            # Get places of loop index
+            ranks = df.iloc[i].value_counts().sort_index()
+            # Save
+            ranks.plot(kind='bar')
+            plt.xlabel("Candidats")
+            plt.ylabel("Nombre de rang " + str(i+1))
+            plt.suptitle("Nombre de rang " + str(i+1) + " par candidat")
+            plt.savefig("figs/" + str(i+1) + "places.png")
 
     # Get the end time
     et = time.time()
