@@ -7,6 +7,22 @@ import matplotlib.pyplot as plt
 
 ########## GENERIC ##########
 
+
+def invert_csv(path, new_path):
+    with open(path, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+
+        # Convertir les lignes en colonnes
+        columns = list(zip(*reader))
+
+    # Écrire les colonnes inversées dans un nouveau fichier CSV
+    with open(new_path, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+        writer.writerows(columns)
+
+    # Fermer le fichier
+    csvfile.close()
+
 # Detect which IDs appears first in the column 'column'. Depending of 'included' is 0 or 1, include or exclude the IDs of the array
 def detect_first_id(column, array, included):
     # print(column)
