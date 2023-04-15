@@ -79,19 +79,29 @@ def table_condorcet(data):
                 gagne += 1
         liste_condorcet.append(gagne)
 
+    max_score = max(liste_condorcet)
+    if liste_condorcet.count(max_score) > 1:
+        print("Egalité detecté, utilisation de la méthode de Copeland ...")
+        copeland_scores = [0] * size
+        for i in range(size):
+            for j in range(size):
+                if i != j:
+                    if liste[i][j] > len(data) / 2:
+                        copeland_scores[i] += 1
+                    elif liste[j][i] > len(data) / 2:
+                        copeland_scores[i] -= 1
+        winner = copeland_scores.index(max(copeland_scores))
+    else:
+        winner = liste_condorcet.index(max_score)
+
     print(liste_condorcet)
-    print("Selon Condorcet, l'élu est le candidat " + str(liste_condorcet.index(max(liste_condorcet)) + 1))
+    print("Selon Condorcet, l'élu est le candidat " + str(winner + 1))
 
     return liste_condorcet
 
 ########## BORDA ##########
 
-def borda2():
-    # Lecture du fichier CSV
-    with open('data/profil1.csv', 'r') as csvfile:
-        reader = csv.reader(csvfile)
-        data = [list(map(int, row)) for row in reader]
-
+def borda(data):
     # Calcul des points de chaque candidat
     num_candidates = len(data[0])
     points = [0] * num_candidates
@@ -106,6 +116,8 @@ def borda2():
     print("Classement final :")
     for i, candidate in enumerate(ranking):
         print(f"{i + 1}. Candidat {candidate + 1} : {points[candidate]} points")
+    
+    print("Le gagnant est le candidat: " + str(ranking[0] + 1) + " avec " + str(points[ranking[0]]) + " points")
 
 ########## ROUNDS ##########
 
@@ -230,24 +242,25 @@ def alternatif(df):
 if __name__ == "__main__":
     # Get the start time
     st = time.time()
-
+    
     # Init df
     profile = input("Choisissez un profil de données:\n1)profil1\n2)profil2\n3)profil3\n")
     method = input("Choisissez une méthode de choix social:\n1)Condorset\n2)Borda\n3)Rounds\n4)Coombs\n5)Alternatif\n6)Save figs\n")
-
     
-    df = pd.read_csv(filepath_or_buffer='data/profil' + profile + '.csv', sep=',', header=None)
-
+    df = pd.read_csv(filepath_or_buffer='ChoixSocial/data/profil' + profile + '.csv', sep=',', header=None)
+    
     # Launch methods
     if (method == "1"):
         print('##### CONDORSET #####')
-        # launch condorset
-        # with open('data/profil1.csv', newline='') as profil1:
-        #     r = csv.reader(profil1)
-        #     data1 = list(r)
+        with open('ChoixSocial/edit_data/profil' + profile + '.csv', newline='') as profil1:
+            r = csv.reader(profil1)
+            data1 = list(r)
+        full_table_condorcet = table_condorcet(data1)
     if (method == "2"):
-        print('##### BORDA #####')
-        # launch borda
+        with open('ChoixSocial/edit_data/profil' + profile + '.csv', newline='') as profil1:
+            reader = csv.reader(profil1)
+            data = [list(map(int, row)) for row in reader]
+        borda(data)
     if (method == "3"):
         nbRounds = input('En combien de tours voulez vous effectuer cette méthode ? (1 ou 2)')
         print('##### ROUNDS #####')
